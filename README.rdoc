@@ -1,0 +1,3 @@
+= has_many_versions
+
+Versioning for has many relationships. Real docs+tests+rails pluginniness forthcoming.
