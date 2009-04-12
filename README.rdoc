@@ -2,6 +2,12 @@
 
 This attempts to provide versioning for 'has many' relationships within ActiveRecord.
 
+== Installation
+
+   script/plugin install git://github.com/joshbuddy/has_many_versions.git
+
+== Usage
+
 Here is a pretty typical relationship.
 
    class Book < ActiveRecord::Base
