@@ -34,13 +34,7 @@ end
 
 class Book < ActiveRecord::Base
   belongs_to :author
-  
   validates_associated :author
-  
-  before_create do |r|
-    r.version = r.initial_version = r.author.version
-  end
-  
 end
 
 class Author < ActiveRecord::Base

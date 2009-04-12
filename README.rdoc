@@ -1,3 +1,118 @@
 = has_many_versions
 
-Versioning for has many relationships. Real docs+tests+rails pluginniness forthcoming.
+This attempts to provide versioning for 'has many' relationships within ActiveRecord.
+
+Here is a pretty typical relationship.
+
+   class Book < ActiveRecord::Base
+     belongs_to :author
+     validates_associated :author
+   end
+ 
+   class Author < ActiveRecord::Base
+     has_many :books
+   end
+
+Lets say we want to include versioning now to modifications made to the collection of books. We can modify the +has_many+ relationship the following way:
+
+   has_many :books, :extend => HasManyVersions
+     
+Now changes made to the relationship with the normal <tt><<</tt> and +delete+ methods will be tracked. There are some modifications needed for both tables for this to work. The owner of the relationship (in this case +Author+) needs an integer column named +version+ (with a default value of one). The collection (in this case +Book+) needs two columns, +initial_version+ and +version+. 
+
+Assuming we've done all that, lets try out some magical versioning to see how it all works.
+
+We'll start by defining some books.
+  the_eyre_affair = Book.new(:name => 'The Eyre Affair')
+  => #<Book id: nil, initial_version: nil, version: nil, author_id: nil, name: "The Eyre Affair">
+  lost_in_a_good_book = Book.new(:name => 'Lost in a Good Book')
+  => #<Book id: nil, initial_version: nil, version: nil, author_id: nil, name: "Lost in a Good Book">
+  the_well_of_lost_plots = Book.new(:name => 'The Well of Lost Plots')
+  => #<Book id: nil, initial_version: nil, version: nil, author_id: nil, name: "The Well of Lost Plots">
+  something_rotten = Book.new(:name => 'Something Rotten')
+  => #<Book id: nil, initial_version: nil, version: nil, author_id: nil, name: "Something Rotten">
+
+And an author to take them.
+  jasper = Author.new(:name => 'Jasper Fforde')
+  => #<Author id: nil, version: 1, name: "Jasper Fforde">
+
+That sounds good. Just so we're all on the same page, how does Jasper look at the moment?
+  jasper.version
+  => 1
+  jasper.books
+  => []
+
+Version 1 is where all versioned objects initially start.
+
+Now, lets start adding some books.
+  jasper.books.push(the_eyre_affair, something_rotten)
+
+And our new version?
+  jasper.version
+  => 2
+
+And our books?
+  jasper.books
+  => [#<Book id: 1, initial_version: 2, version: 2, author_id: 1, name: "The Eyre Affair">,
+      #<Book id: 2, initial_version: 2, version: 2, author_id: 1, name: "Something Rotten">]
+
+Yeah! Everything is good and green.
+
+Lets add on some more books.
+  jasper.books.push(lost_in_a_good_book)
+  jasper.version
+  => 3
+  jasper.books.push(the_well_of_lost_plots)
+  jasper.version
+  => 4
+
+Because we did them one at a time, the version number incremented for each one.
+
+Now, Jasper has a *lot* of books.
+  jasper.books
+  => [#<Book id: 1, initial_version: 2, version: 4, author_id: 1, name: "The Eyre Affair">,
+      #<Book id: 2, initial_version: 2, version: 4, author_id: 1, name: "Something Rotten">,
+      #<Book id: 3, initial_version: 3, version: 4, author_id: 1, name: "Lost in a Good Book">,
+      #<Book id: 4, initial_version: 4, version: 4, author_id: 1, name: "The Well of Lost Plots">]
+
+Lets take one away...
+  jasper.books.delete(lost_in_a_good_book)
+
+And the version has incremented
+  jasper.version
+  => 5
+  jasper.books
+  => [#<Book id: 1, initial_version: 2, version: 5, author_id: 1, name: "The Eyre Affair">,
+      #<Book id: 2, initial_version: 2, version: 5, author_id: 1, name: "Something Rotten">,
+      #<Book id: 4, initial_version: 4, version: 5, author_id: 1, name: "The Well of Lost Plots">]
+
+But thats not right, he *did* write that book. Lets go back in time.
+  jasper.books.rollback
+
+And the version get incremented...
+  jasper.version
+  => 6
+
+And the books...
+  jasper.books
+  => [#<Book id: 5, initial_version: 6, version: 6, author_id: 1, name: "The Eyre Affair">,
+      #<Book id: 6, initial_version: 6, version: 6, author_id: 1, name: "Something Rotten">,
+      #<Book id: 7, initial_version: 6, version: 6, author_id: 1, name: "Lost in a Good Book">,
+      #<Book id: 8, initial_version: 6, version: 6, author_id: 1, name: "The Well of Lost Plots">]
+
+Are right where we left them!
+
+In fact, lets roll it right back to version 2.
+
+  jasper.books.rollback(2)
+  jasper.version
+  => 7
+  jasper.books
+  => [#<Book id: 9, initial_version: 7, version: 7, author_id: 1, name: "The Eyre Affair">,
+      #<Book id: 10, initial_version: 7, version: 7, author_id: 1, name: "Something Rotten">]
+
+And what would the world look like if Jasper Fforde hadn't written anything?
+  jasper.books.rollback(1) #back to version one
+  jasper.version
+  => 8
+  jasper.books
+  => []
