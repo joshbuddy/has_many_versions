@@ -5,7 +5,7 @@ begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
     gem.name = "has_many_versions"
-    gem.summary = %Q{TODO}
+    gem.summary = %Q{Versioning for has_many relationships}
     gem.email = "joshbuddy@gmail.com"
     gem.homepage = "http://github.com/joshbuddy/has_many_versions"
     gem.authors = ["Joshua Hull"]
