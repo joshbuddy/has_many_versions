@@ -1,10 +1,10 @@
 require 'rubygems'
 require 'spec'
 require 'activerecord'
+require 'rails/init'
 
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
-require 'has_many_versions'
 
 Spec::Runner.configure do |config|
   

@@ -1,3 +1,11 @@
+module ActiveRecord
+  module Associations
+    class AssociationCollection
+      alias_method :__concat__, :<<
+    end
+  end
+end
+
 module HasManyVersions
   
   def upgrade_proxy_object
@@ -13,18 +21,24 @@ module HasManyVersions
   
   def <<(*records)
     upgrade_proxy_object do |new_version|
-      proxy_reflection.klass.update_all(
+      changing_records = records.select{|r| !r.new_record? && r.changed?}
+      changing_records.empty? ? proxy_reflection.klass.update_all(
         ['version = ?', new_version], 
         ["#{proxy_reflection.primary_key_name} = ? and version = ?", proxy_owner.id, new_version - 1]
-      )
+      ) : proxy_reflection.klass.update_all(
+            ['version = ?', new_version], 
+            ["#{proxy_reflection.primary_key_name} = ? and version = ? and id not in (?)", proxy_owner.id, new_version - 1, changing_records.collect(&:id)]
+          )
+      records.collect!{|r| !r.new_record? && r.changed? ? r.clone : r}
       flatten_deeper(records).each do |record|
-        record.initial_version ||= proxy_owner.version
+        record.initial_version = proxy_owner.version if record.new_record?
         record.version = proxy_owner.version
       end
-      concat(*records)
+      __concat__(*records)
     end
   end
   alias_method :push, :<<
+  alias_method :concat, :<<
   
   def delete_records(records)
     upgrade_proxy_object do |new_version|
