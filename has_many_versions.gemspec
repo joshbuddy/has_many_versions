@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
   s.date = %q{2009-04-14}
   s.email = %q{joshbuddy@gmail.com}
   s.extra_rdoc_files = ["README.rdoc", "LICENSE"]
-  s.files = ["README.rdoc", "VERSION.yml", "lib/has_many_versions.rb", "spec/add_spec.rb", "spec/database.yml", "spec/delete_spec.rb", "spec/rollback_spec.rb", "spec/spec.opts", "spec/spec_helper.rb", "spec/update_spec.rb", "LICENSE"]
+  s.files = ["README.rdoc", "VERSION.yml", "lib/has_many_versions.rb", "spec/add_spec.rb", "spec/database.yml", "spec/debug.log", "spec/delete_spec.rb", "spec/rollback_spec.rb", "spec/spec.opts", "spec/spec_helper.rb", "spec/update_spec.rb", "LICENSE"]
   s.has_rdoc = true
   s.homepage = %q{http://github.com/joshbuddy/has_many_versions}
   s.rdoc_options = ["--inline-source", "--charset=UTF-8"]
