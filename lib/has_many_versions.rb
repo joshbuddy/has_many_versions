@@ -27,9 +27,17 @@ module HasManyVersions
         ["#{proxy_reflection.primary_key_name} = ? and version = ?", proxy_owner.id, new_version - 1]
       ) : proxy_reflection.klass.update_all(
             ['version = ?', new_version], 
-            ["#{proxy_reflection.primary_key_name} = ? and version = ? and id not in (?)", proxy_owner.id, new_version - 1, changing_records.collect(&:id)]
+            ["#{proxy_reflection.primary_key_name} = ? and version = ? and #{proxy_reflection.klass.primary_key} not in (?)", proxy_owner.id, new_version - 1, changing_records.collect(&:id)]
           )
-      records.collect!{|r| !r.new_record? && r.changed? ? r.clone : r}
+      records.collect! do |r|
+        if !r.new_record? && r.changed?
+          new_r = r.clone
+          new_r.from_version = r.id if new_r.respond_to?(:from_version=)
+          new_r
+        else
+          r
+        end
+      end
       flatten_deeper(records).each do |record|
         record.initial_version = proxy_owner.version if record.new_record?
         record.version = proxy_owner.version

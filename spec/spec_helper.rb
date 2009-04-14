@@ -14,11 +14,12 @@ ActiveRecord::Base.logger = Logger.new(File.dirname(__FILE__) + '/debug.log')
 ActiveRecord::Base.establish_connection(YAML::load(IO.read(File.dirname(__FILE__) + '/database.yml')))
 
 class Database
-  def self.reset!
+  def self.reset!(with_from_version = false)
     ActiveRecord::Schema.define :version => 0 do
       create_table :books, :force => true do |t|
         t.integer :author_id
         t.integer :initial_version
+        t.integer :from_version if with_from_version
         t.integer :version
         t.string :name
       end
@@ -27,6 +28,8 @@ class Database
         t.integer :version, :default => 1
         t.string :name
       end
+      
+      Book.reset_column_information
     end
   end
 

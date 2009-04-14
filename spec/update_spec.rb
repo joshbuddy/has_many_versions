@@ -20,4 +20,21 @@ describe "HasManyVersions updating" do
     jasper.books.first.name.should == 'The Eyre Affair'
   end
   
+  it "should record the 'from version' if that column exists" do
+    Database.reset!(true)
+    jasper = Author.new(:name => 'Jasper Fforde')
+    eyre_affair = Book.new(:name => "The Eyre Affair")
+    jasper.books << eyre_affair
+    jasper.save!
+    jasper.version.should == eyre_affair.version
+    eyre_affair.initial_version.should == eyre_affair.version
+    eyre_affair.name = 'The EYRE affair'
+    jasper.books << eyre_affair
+    jasper.books.first.from_version.should == eyre_affair.id
+    jasper.books.first.id.should == 2
+    jasper.books.first.name.should == 'The EYRE affair'
+    jasper.books.rollback
+    jasper.books.first.name.should == 'The Eyre Affair'
+  end
+  
 end
