@@ -37,4 +37,24 @@ describe "HasManyVersions updating" do
     jasper.books.first.name.should == 'The Eyre Affair'
   end
   
+  it "should record add, delete and update events all at the same time" do
+    Database.reset!(true)
+    jasper = Author.new(:name => 'Jasper Fforde')
+    eyre_affair = Book.new(:name => "The Eyre Affair")
+    shades_of_grey = Book.new(:name => "Shades of Grey")
+    eyre_affair2 = Book.new(:name => "The Eyre Affair 2")
+    shades_of_grey2 = Book.new(:name => "Shades of Grey 2")
+    
+    jasper.version.should == 1
+    jasper.books = [eyre_affair, shades_of_grey]
+    jasper.version.should == 2
+    
+    jasper.books = [shades_of_grey2, eyre_affair]
+    jasper.version.should == 3
+    
+    jasper.books.rollback
+    jasper.books.collect(&:name).should == ['The Eyre Affair', 'Shades of Grey']
+    
+  end
+  
 end
