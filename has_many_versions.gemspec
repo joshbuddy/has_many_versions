@@ -2,11 +2,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{has_many_versions}
-  s.version = "0.0.3"
+  s.version = "0.0.4"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Joshua Hull"]
-  s.date = %q{2009-04-14}
+  s.date = %q{2009-04-15}
   s.email = %q{joshbuddy@gmail.com}
   s.extra_rdoc_files = ["README.rdoc", "LICENSE"]
   s.files = ["README.rdoc", "VERSION.yml", "lib/has_many_versions.rb", "spec/add_spec.rb", "spec/database.yml", "spec/debug.log", "spec/delete_spec.rb", "spec/rollback_spec.rb", "spec/spec.opts", "spec/spec_helper.rb", "spec/update_spec.rb", "LICENSE"]
