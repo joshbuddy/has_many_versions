@@ -91,7 +91,8 @@ module HasManyVersions
   
   def history(from = [proxy_owner.version - 10, 1].max, to = proxy_owner.version)
     history_items = proxy_reflection.klass.find(:all, :conditions => ["#{proxy_reflection.primary_key_name} = ? and version >= ? and initial_version <= ?", proxy_owner.id, from, to])
-    #history_items = proxy_reflection.klass.find(:all, :conditions => ['initial_version is not null'])
+    to = proxy_owner.version if to > proxy_owner.version
+    from = 1 if from < 1
     (from..to).collect do |version|
       HistoryItem.new(version, history_items.select { |item| 
         item.initial_version <= version && item.version >= version
