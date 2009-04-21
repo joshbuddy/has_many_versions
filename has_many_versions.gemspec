@@ -2,14 +2,14 @@
 
 Gem::Specification.new do |s|
   s.name = %q{has_many_versions}
-  s.version = "0.0.4"
+  s.version = "0.0.5"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Joshua Hull"]
-  s.date = %q{2009-04-15}
+  s.date = %q{2009-04-21}
   s.email = %q{joshbuddy@gmail.com}
   s.extra_rdoc_files = ["README.rdoc", "LICENSE"]
-  s.files = ["README.rdoc", "VERSION.yml", "lib/has_many_versions.rb", "spec/add_spec.rb", "spec/database.yml", "spec/delete_spec.rb", "spec/rollback_spec.rb", "spec/spec.opts", "spec/spec_helper.rb", "spec/update_spec.rb", "LICENSE"]
+  s.files = ["README.rdoc", "VERSION.yml", "lib/has_many_versions.rb", "spec/add_spec.rb", "spec/database.yml", "spec/debug.log", "spec/delete_spec.rb", "spec/history_spec.rb", "spec/rollback_spec.rb", "spec/spec.opts", "spec/spec_helper.rb", "spec/update_spec.rb", "LICENSE"]
   s.has_rdoc = true
   s.homepage = %q{http://github.com/joshbuddy/has_many_versions}
   s.rdoc_options = ["--inline-source", "--charset=UTF-8"]
