@@ -90,7 +90,7 @@ module HasManyVersions
   end
   
   def history(from = [proxy_owner.version - 10, 1].max, to = proxy_owner.version)
-    history_items = proxy_reflection.klass.find(:all, :conditions => ['version >= ? and initial_version <= ?', from, to])
+    history_items = proxy_reflection.klass.find(:all, :conditions => ["#{proxy_reflection.primary_key_name} = ? and version >= ? and initial_version <= ?", proxy_owner.id, from, to])
     #history_items = proxy_reflection.klass.find(:all, :conditions => ['initial_version is not null'])
     (from..to).collect do |version|
       HistoryItem.new(version, history_items.select { |item| 
@@ -101,7 +101,7 @@ module HasManyVersions
   
   def rollback(target_version = proxy_owner.version - 1)
     upgrade_proxy_object do |new_version|
-      proxy_reflection.klass.find(:all, :conditions => ['initial_version <= ? and version >= ?', target_version, target_version]).each do |new_record|
+      proxy_reflection.klass.find(:all, :conditions => ["#{proxy_reflection.primary_key_name} = ? and initial_version <= ? and version >= ?", proxy_owner.id, target_version, target_version]).each do |new_record|
         new_record = new_record.clone
         new_record.initial_version = new_version
         new_record.version = new_version
