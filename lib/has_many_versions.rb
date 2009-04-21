@@ -101,6 +101,7 @@ module HasManyVersions
   end
   
   def rollback(target_version = proxy_owner.version - 1)
+    return if target_version == proxy_owner.version
     upgrade_proxy_object do |new_version|
       proxy_reflection.klass.find(:all, :conditions => ["#{proxy_reflection.primary_key_name} = ? and initial_version <= ? and version >= ?", proxy_owner.id, target_version, target_version]).each do |new_record|
         new_record = new_record.clone
