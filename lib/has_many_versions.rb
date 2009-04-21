@@ -28,19 +28,21 @@ module HasManyVersions
 
     upgrade_proxy_object do |new_version|
       delete_records_without_versioning_transaction(new_version, @target.select { |v| !other.include?(v) })
-      add_records_without_versioning_transaction(new_version, *other_array.select { |v| !current.include?(v) })
+      add_records_without_versioning_transaction(new_version, other_array.select { |v| !current.include?(v) }, @target.select { |v| !other.include?(v) }.collect(&:id))
     end
   end
   
-  def add_records_without_versioning_transaction(new_version, *records)
+  def add_records_without_versioning_transaction(new_version, records, excluded_ids = [])
     changing_records = flatten_deeper(records).select{|r| !r.new_record? && r.changed?}
-    changing_records.empty? ? proxy_reflection.klass.update_all(
-      ['version = ?', new_version], 
-      ["#{proxy_reflection.primary_key_name} = ? and version = ?", proxy_owner.id, new_version - 1]
-    ) : proxy_reflection.klass.update_all(
-          ['version = ?', new_version], 
-          ["#{proxy_reflection.primary_key_name} = ? and version = ? and #{proxy_reflection.klass.primary_key} not in (?)", proxy_owner.id, new_version - 1, changing_records.collect(&:id)]
-        )
+    excluded_ids.concat(changing_records.collect(&:id)) unless changing_records.empty?
+    excluded_ids.empty? ? 
+      proxy_reflection.klass.update_all(
+        ['version = ?', new_version], 
+        ["#{proxy_reflection.primary_key_name} = ? and version = ?", proxy_owner.id, new_version - 1]
+      ) : proxy_reflection.klass.update_all(
+        ['version = ?', new_version], 
+        ["#{proxy_reflection.primary_key_name} = ? and version = ? and #{proxy_reflection.klass.primary_key} not in (?)", proxy_owner.id, new_version - 1, excluded_ids]
+      )
     records = flatten_deeper(records).collect do |r|
       if !r.new_record? && r.changed?
         new_r = r.clone
@@ -60,7 +62,7 @@ module HasManyVersions
   
   def <<(*records)
     upgrade_proxy_object do |new_version|
-      add_records_without_versioning_transaction(new_version, *records)
+      add_records_without_versioning_transaction(new_version, records)
     end
   end
   

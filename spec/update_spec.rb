@@ -51,7 +51,7 @@ describe "HasManyVersions updating" do
     
     jasper.books = [shades_of_grey2, eyre_affair]
     jasper.version.should == 3
-    
+    jasper.books.collect(&:name).should == ['The Eyre Affair', 'Shades of Grey 2']
     jasper.books.rollback
     jasper.books.collect(&:name).should == ['The Eyre Affair', 'Shades of Grey']
     
