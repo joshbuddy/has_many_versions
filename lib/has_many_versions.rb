@@ -8,6 +8,8 @@ end
 
 module HasManyVersions
   
+  HistoryItem = Struct.new(:version, :state)
+
   def upgrade_proxy_object
     proxy_owner.transaction do
       new_version = proxy_owner.version + 1
@@ -33,7 +35,9 @@ module HasManyVersions
   end
   
   def add_records_without_versioning_transaction(new_version, records, excluded_ids = [])
-    changing_records = flatten_deeper(records).select{|r| !r.new_record? && r.changed?}
+    changing_records = flatten_deeper(records).select{ |r|
+      (!r.new_record? && (r.changed? || (r.version != (new_version - 1))))
+    }
     excluded_ids.concat(changing_records.collect(&:id)) unless changing_records.empty?
     excluded_ids.empty? ? 
       proxy_reflection.klass.update_all(
@@ -44,7 +48,7 @@ module HasManyVersions
         ["#{proxy_reflection.primary_key_name} = ? and version = ? and #{proxy_reflection.klass.primary_key} not in (?)", proxy_owner.id, new_version - 1, excluded_ids]
       )
     records = flatten_deeper(records).collect do |r|
-      if !r.new_record? && r.changed?
+      if changing_records.include?(r)
         new_r = r.clone
         new_r.from_version = r.id if new_r.respond_to?(:from_version=)
         new_r
@@ -53,7 +57,7 @@ module HasManyVersions
       end
     end
     flatten_deeper(records).each do |record|
-      record.initial_version = proxy_owner.version if record.new_record?
+      record.initial_version = proxy_owner.version if record.initial_version.nil? or record.new_record?
       record.version = proxy_owner.version
     end
     __concat__(*records)
@@ -83,6 +87,16 @@ module HasManyVersions
     interpolate_sql(@reflection.sanitized_conditions ?
       '%s AND %s.version = #{version}' % [@reflection.sanitized_conditions, proxy_reflection.quoted_table_name] :
       '%s.version = #{version}' % [proxy_reflection.quoted_table_name])
+  end
+  
+  def history(from = [proxy_owner.version - 10, 1].max, to = proxy_owner.version)
+    history_items = proxy_reflection.klass.find(:all, :conditions => ['version >= ? and initial_version <= ?', from, to])
+    #history_items = proxy_reflection.klass.find(:all, :conditions => ['initial_version is not null'])
+    (from..to).collect do |version|
+      HistoryItem.new(version, history_items.select { |item| 
+        item.initial_version <= version && item.version >= version
+      })
+    end
   end
   
   def rollback(target_version = proxy_owner.version - 1)
