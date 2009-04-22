@@ -9,7 +9,7 @@ begin
     gem.email = "joshbuddy@gmail.com"
     gem.homepage = "http://github.com/joshbuddy/has_many_versions"
     gem.authors = ["Joshua Hull"]
-    # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
+    gem.files = FileList["[A-Z]*", "{lib,spec,rails,bin}/**/*.rb", 'spec/database.yml', 'spec/spec.opts']
   end
 rescue LoadError
   puts "Jeweler not available. Install it with: sudo gem install technicalpickles-jeweler -s http://gems.github.com"
