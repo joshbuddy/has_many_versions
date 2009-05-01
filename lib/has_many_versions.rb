@@ -112,5 +112,9 @@ module HasManyVersions
     end
 
   end
+
+  def at(target_version)
+    proxy_reflection.klass.find(:all, :conditions => ["#{proxy_reflection.primary_key_name} = ? and initial_version <= ? and version >= ?", proxy_owner.id, target_version, target_version])
+  end
   
 end

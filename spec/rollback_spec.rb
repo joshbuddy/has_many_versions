@@ -56,6 +56,8 @@ describe "HasManyVersions rollbacks" do
     jasper.books.collect(&:name).should == [eyre_affair.name, shades_of_grey.name, eyre_affair2.name, shades_of_grey2.name, eyre_affair3.name]
     jasper.books.rollback(3)
     jasper.books.collect(&:name).should == [eyre_affair.name, shades_of_grey.name, eyre_affair2.name, shades_of_grey2.name]
+    jasper.books.at(2).collect(&:name).should == [eyre_affair.name, shades_of_grey.name]
+    jasper.books.collect(&:name).should == [eyre_affair.name, shades_of_grey.name, eyre_affair2.name, shades_of_grey2.name]
   end
 
 end
