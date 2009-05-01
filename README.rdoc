@@ -122,3 +122,11 @@ And what would the world look like if Jasper Fforde hadn't written anything?
   => 8
   jasper.books
   => []
+
+Of course, it's always fun to reminisce
+  jasper.books.at(3)
+  => [#<Book id: 27, author_id: 3, initial_version: 2, version: 5, name: "The Eyre Affair">,
+      #<Book id: 28, author_id: 3, initial_version: 2, version: 5, name: "Something Rotten">,
+      #<Book id: 29, author_id: 3, initial_version: 3, version: 4, name: "Lost in a Good Book">]
+  jasper.books
+  => []
