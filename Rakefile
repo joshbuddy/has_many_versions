@@ -11,6 +11,8 @@ begin
     gem.authors = ["Joshua Hull"]
     gem.files = FileList["[A-Z]*", "{lib,spec,rails,bin}/**/*.rb", 'spec/database.yml', 'spec/spec.opts']
   end
+  Jeweler::GemcutterTasks.new
+  
 rescue LoadError
   puts "Jeweler not available. Install it with: sudo gem install technicalpickles-jeweler -s http://gems.github.com"
 end
